@@ -111,22 +111,14 @@ import { zoomBot } from "./helpers/zoomBot.js";
     });
     
  
-    app.get("/scheduled-meetings", (req, res) => {
+    app.post("/scheduled-meetings", (req, res) => {
         const scheduledJobs = schedule.scheduledJobs;
-        const jobs = Object.keys(scheduledJobs).reduce((acc, jobName) => {
-            acc[jobName] = {
-                nextInvocation: scheduledJobs[jobName].nextInvocation(),
-                status: 'scheduled',
-                createdAt: new Date().toISOString()
-            };
-            return acc;
-        }, {});
+        const jobs = Object.keys(scheduledJobs).map(jobName => ({
+            jobName,
+            nextInvocation: scheduledJobs[jobName].nextInvocation()
+        }));
         
-        res.json({
-            status: 'success',
-            count: Object.keys(jobs).length,
-            meetings: jobs
-        });
+        res.status(200).json(jobs);
     });
     
     app.post("/extension", async (req, res) => {
